@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>All Tenders</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <h2>All Tenders</h2>
+
+  <!-- Search Form for Tenders -->
+  <form action="/alltenders" method="GET" style="margin-bottom: 20px; text-align: center;">
+    <input type="text" name="q" placeholder="Search tenders by title or description" style="width: 300px; padding: 8px;">
+    <button type="submit">Search</button>
+  </form>
+
+  <% if (tenders.length > 0) { %>
+    <ul>
+      <% tenders.forEach(tender => { %>
+        <li>
+          <strong><%= tender.title %></strong><br/>
+          <small>Deadline: <%= new Date(tender.deadline).toLocaleDateString() %></small><br/>
+          <em><%= tender.description %></em><br/>
+          <b>Budget: ₹<%= tender.budget %></b>
+          <hr/>
+        </li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <p>No tenders available.</p>
+  <% } %>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

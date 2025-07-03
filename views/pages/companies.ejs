@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>All Companies</title>
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+
+    <h2>All Companies</h2>
+
+    <% if (companies.length > 0) { %>
+      <ul>
+        <% companies.forEach(c => { %>
+          <li>
+            <strong><%= c.name %></strong><br/>
+            <em><%= c.industry %></em><br/>
+            <p><%= c.description %></p>
+            <% if (c.logo_url) { %>
+              <img src="<%= c.logo_url %>" alt="logo" width="100" />
+            <% } %>
+            <hr/>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>No companies available.</p>
+    <% } %>
+
+    <form action="/company/search" method="GET">
+  <input type="text" name="q" placeholder="Search companies..." />
+  <button type="submit">Search</button>
+</form>
+
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

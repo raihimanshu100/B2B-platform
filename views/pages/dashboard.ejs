@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="hero">
+    <h1>Welcome to your Dashboard</h1>
+    <p>Create and publish tenders or manage your company profile.</p>
+  </div>
+
+  <div style="text-align: center; margin-bottom: 30px;">
+    <button onclick="showForm('tender')">Create / Publish Tender</button>
+    <button onclick="showForm('company')">Create / Update Company</button>
+  </div>
+
+  <!-- Tender Form -->
+  <form id="tenderForm" style="display: none;" onsubmit="submitTender(event)">
+    <h3>Create a Tender</h3>
+    <input type="text" id="tenderTitle" placeholder="Tender Title" required /><br/>
+    <textarea id="tenderDescription" placeholder="Tender Description" required></textarea><br/>
+    <input type="date" id="tenderDeadline" required /><br/>
+    <input type="number" id="tenderBudget" placeholder="Budget in INR" required /><br/>
+    <button type="submit">Submit Tender</button>
+  </form>
+
+  <!-- Company Form -->
+  <form id="companyForm" style="display: none;" onsubmit="submitCompany(event)">
+    <h3>Create / Update Company</h3>
+    <input type="text" id="companyName" placeholder="Company Name" required /><br/>
+    <input type="text" id="companyIndustry" placeholder="Industry" required /><br/>
+    <textarea id="companyDescription" placeholder="Description"></textarea><br/>
+    <input type="text" id="companyLogoUrl" placeholder="Logo URL (optional)" /><br/>
+    <button type="submit">Save Company</button>
+  </form>
+
+  <!-- User Tenders Section -->
+  <div id="userTenders">
+    <h3>Your Tenders</h3>
+    <ul id="tenderList"></ul>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    function showForm(type) {
+      document.getElementById('tenderForm').style.display = type === 'tender' ? 'block' : 'none';
+      document.getElementById('companyForm').style.display = type === 'company' ? 'block' : 'none';
+    }
+
+    async function submitTender(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      try {
+        await axios.post('/tender', {
+          title: document.getElementById('tenderTitle').value,
+          description: document.getElementById('tenderDescription').value,
+          deadline: document.getElementById('tenderDeadline').value,
+          budget: document.getElementById('tenderBudget').value
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Tender submitted!');
+        document.getElementById('tenderForm').reset();
+        fetchUserTenders();
+      } catch (err) {
+        alert('Error: ' + (err.response?.data?.error || 'Unknown error'));
+      }
+    }
+
+    async function submitCompany(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      try {
+        await axios.post('/company', {
+          name: document.getElementById('companyName').value,
+          industry: document.getElementById('companyIndustry').value,
+          description: document.getElementById('companyDescription').value,
+          logo_url: document.getElementById('companyLogoUrl').value
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Company saved!');
+      } catch (err) {
+        alert('Error: ' + (err.response?.data?.error || 'Unknown error'));
+      }
+    }
+
+    async function fetchUserTenders() {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await axios.get('/tender/my', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const list = document.getElementById('tenderList');
+        list.innerHTML = '';
+        res.data.forEach(tender => {
+          const li = document.createElement('li');
+          li.innerHTML = `<strong>${tender.title}</strong><br/>${tender.description}<br/>Deadline: ${new Date(tender.deadline).toLocaleDateString()} | Budget: ₹${tender.budget}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error('Failed to load tenders:', err);
+      }
+    }
+
+    // Fetch user tenders when dashboard loads
+    fetchUserTenders();
+  </script>
+</body>
+</html>
